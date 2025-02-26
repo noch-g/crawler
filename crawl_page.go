@@ -11,6 +11,9 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 		<-cfg.concurrencyControl
 		cfg.wg.Done()
 	}()
+	if cfg.pagesLen() >= cfg.maxPages {
+		return
+	}
 
 	currentURL, err := url.Parse(rawCurrentURL)
 	if err != nil {
@@ -31,7 +34,6 @@ func (cfg *config) crawlPage(rawCurrentURL string) {
 		// If not first visit, adding page visit to config is enough
 		return
 	}
-	fmt.Printf("Now crawling %s...\n", rawCurrentURL)
 
 	htmlBody, err := getHTML(rawCurrentURL)
 	if err != nil {

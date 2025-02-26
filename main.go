@@ -17,10 +17,17 @@ func main() {
 	rawBaseURL := args[0]
 	fmt.Printf("starting crawl of: %v...\n", rawBaseURL)
 
-	pages := map[string]int{}
-	crawlPage(rawBaseURL, rawBaseURL, pages)
+	const maxConcurrency = 5
+	config, err := configure(rawBaseURL, maxConcurrency)
+	if err != nil {
+		fmt.Printf("could not initialize config: %v\n", err)
+	}
 
-	for normalizedURL, count := range pages {
+	config.wg.Add(1)
+	go config.crawlPage(rawBaseURL)
+	config.wg.Wait()
+
+	for normalizedURL, count := range config.pages {
 		fmt.Printf("%d - %s\n", count, normalizedURL)
 	}
 }
